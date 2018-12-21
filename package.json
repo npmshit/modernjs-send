@@ -1,13 +1,8 @@
 {
-  "name": "send",
+  "name": "@modernjs/send",
   "description": "Better streaming static file server with Range and conditional-GET support",
   "version": "0.16.2",
-  "author": "TJ Holowaychuk <tj@vision-media.ca>",
-  "contributors": [
-    "Douglas Christopher Wilson <doug@somethingdoug.com>",
-    "James Wyatt Cready <jcready@gmail.com>",
-    "Jesús Leganés Combarro <piranna@gmail.com>"
-  ],
+  "author": "Zongmin Lei <leizongmin@gmail.com>",
   "license": "MIT",
   "repository": "pillarjs/send",
   "keywords": [
