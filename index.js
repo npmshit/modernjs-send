@@ -25,8 +25,8 @@ var parseRange = require('./modules/range-parser')
 var createError = require('./modules/http-errors')
 var encodeUrl = require('./modules/encodeurl')
 var escapeHtml = require('./modules/escape-html')
+var etag = require('./modules/etag')
 
-var etag = require('etag')
 var fresh = require('fresh')
 
 var debug = require('debug')('send')
