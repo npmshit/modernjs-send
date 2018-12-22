@@ -25,7 +25,7 @@ var ms = require('./modules/ms')
 var onFinished = require('on-finished')
 var parseRange = require('range-parser')
 var path = require('path')
-var statuses = require('statuses')
+var statuses = require('./modules/statuses')
 var Stream = require('stream')
 var util = require('util')
 
