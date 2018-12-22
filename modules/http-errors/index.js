@@ -5,16 +5,16 @@
  * MIT Licensed
  */
 
-'use strict'
+"use strict";
 
 /**
  * Module dependencies.
  * @private
  */
 
-var setPrototypeOf = Object.setPrototypeOf
-var statuses = require('../statuses')
-var inherits = require('util').inherits
+var setPrototypeOf = Object.setPrototypeOf;
+var statuses = require("../statuses");
+var inherits = require("util").inherits;
 
 /**
  * Trasform the given string into a JavaScript identifier
@@ -24,14 +24,14 @@ var inherits = require('util').inherits
  * @public
  */
 
-function toIdentifier (str) {
+function toIdentifier(str) {
   return str
-    .split(' ')
-    .map(function (token) {
-      return token.slice(0, 1).toUpperCase() + token.slice(1)
+    .split(" ")
+    .map(function(token) {
+      return token.slice(0, 1).toUpperCase() + token.slice(1);
     })
-    .join('')
-    .replace(/[^ _0-9a-z]/gi, '')
+    .join("")
+    .replace(/[^ _0-9a-z]/gi, "");
 }
 
 /**
@@ -39,19 +39,19 @@ function toIdentifier (str) {
  * @public
  */
 
-module.exports = createError
-module.exports.HttpError = createHttpErrorConstructor()
+module.exports = createError;
+module.exports.HttpError = createHttpErrorConstructor();
 
 // Populate exports for all constructors
-populateConstructorExports(module.exports, statuses.codes, module.exports.HttpError)
+populateConstructorExports(module.exports, statuses.codes, module.exports.HttpError);
 
 /**
  * Get the code class of a status code.
  * @private
  */
 
-function codeClass (status) {
-  return Number(String(status).charAt(0) + '00')
+function codeClass(status) {
+  return Number(String(status).charAt(0) + "00");
 }
 
 /**
@@ -61,61 +61,58 @@ function codeClass (status) {
  * @public
  */
 
-function createError () {
+function createError() {
   // so much arity going on ~_~
-  var err
-  var msg
-  var status = 500
-  var props = {}
+  var err;
+  var msg;
+  var status = 500;
+  var props = {};
   for (var i = 0; i < arguments.length; i++) {
-    var arg = arguments[i]
+    var arg = arguments[i];
     if (arg instanceof Error) {
-      err = arg
-      status = err.status || err.statusCode || status
-      continue
+      err = arg;
+      status = err.status || err.statusCode || status;
+      continue;
     }
     switch (typeof arg) {
-      case 'string':
-        msg = arg
-        break
-      case 'number':
-        status = arg
-        break
-      case 'object':
-        props = arg
-        break
+      case "string":
+        msg = arg;
+        break;
+      case "number":
+        status = arg;
+        break;
+      case "object":
+        props = arg;
+        break;
     }
   }
 
-  if (typeof status !== 'number' ||
-    (!statuses[status] && (status < 400 || status >= 600))) {
-    status = 500
+  if (typeof status !== "number" || (!statuses[status] && (status < 400 || status >= 600))) {
+    status = 500;
   }
 
   // constructor
-  var HttpError = createError[status] || createError[codeClass(status)]
+  var HttpError = createError[status] || createError[codeClass(status)];
 
   if (!err) {
     // create error
-    err = HttpError
-      ? new HttpError(msg)
-      : new Error(msg || statuses[status])
-    Error.captureStackTrace(err, createError)
+    err = HttpError ? new HttpError(msg) : new Error(msg || statuses[status]);
+    Error.captureStackTrace(err, createError);
   }
 
   if (!HttpError || !(err instanceof HttpError) || err.status !== status) {
     // add properties to generic error
-    err.expose = status < 500
-    err.status = err.statusCode = status
+    err.expose = status < 500;
+    err.status = err.statusCode = status;
   }
 
   for (var key in props) {
-    if (key !== 'status' && key !== 'statusCode') {
-      err[key] = props[key]
+    if (key !== "status" && key !== "statusCode") {
+      err[key] = props[key];
     }
   }
 
-  return err
+  return err;
 }
 
 /**
@@ -123,14 +120,14 @@ function createError () {
  * @private
  */
 
-function createHttpErrorConstructor () {
-  function HttpError () {
-    throw new TypeError('cannot construct abstract class')
+function createHttpErrorConstructor() {
+  function HttpError() {
+    throw new TypeError("cannot construct abstract class");
   }
 
-  inherits(HttpError, Error)
+  inherits(HttpError, Error);
 
-  return HttpError
+  return HttpError;
 }
 
 /**
@@ -138,47 +135,47 @@ function createHttpErrorConstructor () {
  * @private
  */
 
-function createClientErrorConstructor (HttpError, name, code) {
-  var className = name.match(/Error$/) ? name : name + 'Error'
+function createClientErrorConstructor(HttpError, name, code) {
+  var className = name.match(/Error$/) ? name : name + "Error";
 
-  function ClientError (message) {
+  function ClientError(message) {
     // create the error object
-    var msg = message != null ? message : statuses[code]
-    var err = new Error(msg)
+    var msg = message != null ? message : statuses[code];
+    var err = new Error(msg);
 
     // capture a stack trace to the construction point
-    Error.captureStackTrace(err, ClientError)
+    Error.captureStackTrace(err, ClientError);
 
     // adjust the [[Prototype]]
-    setPrototypeOf(err, ClientError.prototype)
+    setPrototypeOf(err, ClientError.prototype);
 
     // redefine the error message
-    Object.defineProperty(err, 'message', {
+    Object.defineProperty(err, "message", {
       enumerable: true,
       configurable: true,
       value: msg,
-      writable: true
-    })
+      writable: true,
+    });
 
     // redefine the error name
-    Object.defineProperty(err, 'name', {
+    Object.defineProperty(err, "name", {
       enumerable: false,
       configurable: true,
       value: className,
-      writable: true
-    })
+      writable: true,
+    });
 
-    return err
+    return err;
   }
 
-  inherits(ClientError, HttpError)
-  nameFunc(ClientError, className)
+  inherits(ClientError, HttpError);
+  nameFunc(ClientError, className);
 
-  ClientError.prototype.status = code
-  ClientError.prototype.statusCode = code
-  ClientError.prototype.expose = true
+  ClientError.prototype.status = code;
+  ClientError.prototype.statusCode = code;
+  ClientError.prototype.expose = true;
 
-  return ClientError
+  return ClientError;
 }
 
 /**
@@ -186,47 +183,47 @@ function createClientErrorConstructor (HttpError, name, code) {
  * @private
  */
 
-function createServerErrorConstructor (HttpError, name, code) {
-  var className = name.match(/Error$/) ? name : name + 'Error'
+function createServerErrorConstructor(HttpError, name, code) {
+  var className = name.match(/Error$/) ? name : name + "Error";
 
-  function ServerError (message) {
+  function ServerError(message) {
     // create the error object
-    var msg = message != null ? message : statuses[code]
-    var err = new Error(msg)
+    var msg = message != null ? message : statuses[code];
+    var err = new Error(msg);
 
     // capture a stack trace to the construction point
-    Error.captureStackTrace(err, ServerError)
+    Error.captureStackTrace(err, ServerError);
 
     // adjust the [[Prototype]]
-    setPrototypeOf(err, ServerError.prototype)
+    setPrototypeOf(err, ServerError.prototype);
 
     // redefine the error message
-    Object.defineProperty(err, 'message', {
+    Object.defineProperty(err, "message", {
       enumerable: true,
       configurable: true,
       value: msg,
-      writable: true
-    })
+      writable: true,
+    });
 
     // redefine the error name
-    Object.defineProperty(err, 'name', {
+    Object.defineProperty(err, "name", {
       enumerable: false,
       configurable: true,
       value: className,
-      writable: true
-    })
+      writable: true,
+    });
 
-    return err
+    return err;
   }
 
-  inherits(ServerError, HttpError)
-  nameFunc(ServerError, className)
+  inherits(ServerError, HttpError);
+  nameFunc(ServerError, className);
 
-  ServerError.prototype.status = code
-  ServerError.prototype.statusCode = code
-  ServerError.prototype.expose = false
+  ServerError.prototype.status = code;
+  ServerError.prototype.statusCode = code;
+  ServerError.prototype.expose = false;
 
-  return ServerError
+  return ServerError;
 }
 
 /**
@@ -234,12 +231,12 @@ function createServerErrorConstructor (HttpError, name, code) {
  * @private
  */
 
-function nameFunc (func, name) {
-  var desc = Object.getOwnPropertyDescriptor(func, 'name')
+function nameFunc(func, name) {
+  var desc = Object.getOwnPropertyDescriptor(func, "name");
 
   if (desc && desc.configurable) {
-    desc.value = name
-    Object.defineProperty(func, 'name', desc)
+    desc.value = name;
+    Object.defineProperty(func, "name", desc);
   }
 }
 
@@ -248,24 +245,24 @@ function nameFunc (func, name) {
  * @private
  */
 
-function populateConstructorExports (exports, codes, HttpError) {
-  codes.forEach(function forEachCode (code) {
-    var CodeError
-    var name = toIdentifier(statuses[code])
+function populateConstructorExports(exports, codes, HttpError) {
+  codes.forEach(function forEachCode(code) {
+    var CodeError;
+    var name = toIdentifier(statuses[code]);
 
     switch (codeClass(code)) {
       case 400:
-        CodeError = createClientErrorConstructor(HttpError, name, code)
-        break
+        CodeError = createClientErrorConstructor(HttpError, name, code);
+        break;
       case 500:
-        CodeError = createServerErrorConstructor(HttpError, name, code)
-        break
+        CodeError = createServerErrorConstructor(HttpError, name, code);
+        break;
     }
 
     if (CodeError) {
       // export the constructor
-      exports[code] = CodeError
-      exports[name] = CodeError
+      exports[code] = CodeError;
+      exports[name] = CodeError;
     }
-  })
+  });
 }

@@ -5,14 +5,14 @@
  * MIT Licensed
  */
 
-'use strict'
+"use strict";
 
 /**
  * Module exports.
  * @public
  */
 
-module.exports = rangeParser
+module.exports = rangeParser;
 
 /**
  * Parse "Range" header `str` relative to the given file `size`.
@@ -24,60 +24,58 @@ module.exports = rangeParser
  * @public
  */
 
-function rangeParser (size, str, options) {
-  var index = str.indexOf('=')
+function rangeParser(size, str, options) {
+  var index = str.indexOf("=");
 
   if (index === -1) {
-    return -2
+    return -2;
   }
 
   // split the range string
-  var arr = str.slice(index + 1).split(',')
-  var ranges = []
+  var arr = str.slice(index + 1).split(",");
+  var ranges = [];
 
   // add ranges type
-  ranges.type = str.slice(0, index)
+  ranges.type = str.slice(0, index);
 
   // parse all ranges
   for (var i = 0; i < arr.length; i++) {
-    var range = arr[i].split('-')
-    var start = parseInt(range[0], 10)
-    var end = parseInt(range[1], 10)
+    var range = arr[i].split("-");
+    var start = parseInt(range[0], 10);
+    var end = parseInt(range[1], 10);
 
     // -nnn
     if (isNaN(start)) {
-      start = size - end
-      end = size - 1
-    // nnn-
+      start = size - end;
+      end = size - 1;
+      // nnn-
     } else if (isNaN(end)) {
-      end = size - 1
+      end = size - 1;
     }
 
     // limit last-byte-pos to current length
     if (end > size - 1) {
-      end = size - 1
+      end = size - 1;
     }
 
     // invalid or unsatisifiable
     if (isNaN(start) || isNaN(end) || start > end || start < 0) {
-      continue
+      continue;
     }
 
     // add range
     ranges.push({
       start: start,
-      end: end
-    })
+      end: end,
+    });
   }
 
   if (ranges.length < 1) {
     // unsatisifiable
-    return -1
+    return -1;
   }
 
-  return options && options.combine
-    ? combineRanges(ranges)
-    : ranges
+  return options && options.combine ? combineRanges(ranges) : ranges;
 }
 
 /**
@@ -85,33 +83,33 @@ function rangeParser (size, str, options) {
  * @private
  */
 
-function combineRanges (ranges) {
-  var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart)
+function combineRanges(ranges) {
+  var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart);
 
   for (var j = 0, i = 1; i < ordered.length; i++) {
-    var range = ordered[i]
-    var current = ordered[j]
+    var range = ordered[i];
+    var current = ordered[j];
 
     if (range.start > current.end + 1) {
       // next range
-      ordered[++j] = range
+      ordered[++j] = range;
     } else if (range.end > current.end) {
       // extend range
-      current.end = range.end
-      current.index = Math.min(current.index, range.index)
+      current.end = range.end;
+      current.index = Math.min(current.index, range.index);
     }
   }
 
   // trim ordered array
-  ordered.length = j + 1
+  ordered.length = j + 1;
 
   // generate combined range
-  var combined = ordered.sort(sortByRangeIndex).map(mapWithoutIndex)
+  var combined = ordered.sort(sortByRangeIndex).map(mapWithoutIndex);
 
   // copy ranges type
-  combined.type = ranges.type
+  combined.type = ranges.type;
 
-  return combined
+  return combined;
 }
 
 /**
@@ -119,12 +117,12 @@ function combineRanges (ranges) {
  * @private
  */
 
-function mapWithIndex (range, index) {
+function mapWithIndex(range, index) {
   return {
     start: range.start,
     end: range.end,
-    index: index
-  }
+    index: index,
+  };
 }
 
 /**
@@ -132,11 +130,11 @@ function mapWithIndex (range, index) {
  * @private
  */
 
-function mapWithoutIndex (range) {
+function mapWithoutIndex(range) {
   return {
     start: range.start,
-    end: range.end
-  }
+    end: range.end,
+  };
 }
 
 /**
@@ -144,8 +142,8 @@ function mapWithoutIndex (range) {
  * @private
  */
 
-function sortByRangeIndex (a, b) {
-  return a.index - b.index
+function sortByRangeIndex(a, b) {
+  return a.index - b.index;
 }
 
 /**
@@ -153,6 +151,6 @@ function sortByRangeIndex (a, b) {
  * @private
  */
 
-function sortByRangeStart (a, b) {
-  return a.start - b.start
+function sortByRangeStart(a, b) {
+  return a.start - b.start;
 }

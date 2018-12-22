@@ -4,29 +4,29 @@
  * MIT Licensed
  */
 
-'use strict'
+"use strict";
 
 /**
  * Module exports.
  * @public
  */
 
-module.exports = etag
+module.exports = etag;
 
 /**
  * Module dependencies.
  * @private
  */
 
-var crypto = require('crypto')
-var Stats = require('fs').Stats
+var crypto = require("crypto");
+var Stats = require("fs").Stats;
 
 /**
  * Module variables.
  * @private
  */
 
-var toString = Object.prototype.toString
+var toString = Object.prototype.toString;
 
 /**
  * Generate an entity tag.
@@ -36,25 +36,23 @@ var toString = Object.prototype.toString
  * @private
  */
 
-function entitytag (entity) {
+function entitytag(entity) {
   if (entity.length === 0) {
     // fast-path empty
-    return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"'
+    return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
   }
 
   // compute hash of entity
   var hash = crypto
-    .createHash('sha1')
-    .update(entity, 'utf8')
-    .digest('base64')
-    .substring(0, 27)
+    .createHash("sha1")
+    .update(entity, "utf8")
+    .digest("base64")
+    .substring(0, 27);
 
   // compute length of entity
-  var len = typeof entity === 'string'
-    ? Buffer.byteLength(entity, 'utf8')
-    : entity.length
+  var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
 
-  return '"' + len.toString(16) + '-' + hash + '"'
+  return '"' + len.toString(16) + "-" + hash + '"';
 }
 
 /**
@@ -67,30 +65,24 @@ function entitytag (entity) {
  * @public
  */
 
-function etag (entity, options) {
+function etag(entity, options) {
   if (entity == null) {
-    throw new TypeError('argument entity is required')
+    throw new TypeError("argument entity is required");
   }
 
   // support fs.Stats object
-  var isStats = isstats(entity)
-  var weak = options && typeof options.weak === 'boolean'
-    ? options.weak
-    : isStats
+  var isStats = isstats(entity);
+  var weak = options && typeof options.weak === "boolean" ? options.weak : isStats;
 
   // validate argument
-  if (!isStats && typeof entity !== 'string' && !Buffer.isBuffer(entity)) {
-    throw new TypeError('argument entity must be string, Buffer, or fs.Stats')
+  if (!isStats && typeof entity !== "string" && !Buffer.isBuffer(entity)) {
+    throw new TypeError("argument entity must be string, Buffer, or fs.Stats");
   }
 
   // generate entity tag
-  var tag = isStats
-    ? stattag(entity)
-    : entitytag(entity)
+  var tag = isStats ? stattag(entity) : entitytag(entity);
 
-  return weak
-    ? 'W/' + tag
-    : tag
+  return weak ? "W/" + tag : tag;
 }
 
 /**
@@ -101,18 +93,25 @@ function etag (entity, options) {
  * @api private
  */
 
-function isstats (obj) {
+function isstats(obj) {
   // genuine fs.Stats
-  if (typeof Stats === 'function' && obj instanceof Stats) {
-    return true
+  if (typeof Stats === "function" && obj instanceof Stats) {
+    return true;
   }
 
   // quack quack
-  return obj && typeof obj === 'object' &&
-    'ctime' in obj && toString.call(obj.ctime) === '[object Date]' &&
-    'mtime' in obj && toString.call(obj.mtime) === '[object Date]' &&
-    'ino' in obj && typeof obj.ino === 'number' &&
-    'size' in obj && typeof obj.size === 'number'
+  return (
+    obj &&
+    typeof obj === "object" &&
+    "ctime" in obj &&
+    toString.call(obj.ctime) === "[object Date]" &&
+    "mtime" in obj &&
+    toString.call(obj.mtime) === "[object Date]" &&
+    "ino" in obj &&
+    typeof obj.ino === "number" &&
+    "size" in obj &&
+    typeof obj.size === "number"
+  );
 }
 
 /**
@@ -123,9 +122,9 @@ function isstats (obj) {
  * @private
  */
 
-function stattag (stat) {
-  var mtime = stat.mtime.getTime().toString(16)
-  var size = stat.size.toString(16)
+function stattag(stat) {
+  var mtime = stat.mtime.getTime().toString(16);
+  var size = stat.size.toString(16);
 
-  return '"' + size + '-' + mtime + '"'
+  return '"' + size + "-" + mtime + '"';
 }
