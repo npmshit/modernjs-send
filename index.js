@@ -14,7 +14,6 @@
 
 var createError = require('http-errors')
 var debug = require('debug')('send')
-var deprecate = require('depd')('send')
 var destroy = require('destroy')
 var encodeUrl = require('encodeurl')
 var escapeHtml = require('escape-html')
@@ -124,10 +123,6 @@ function SendStream (req, path, options) {
 
   this._hidden = Boolean(opts.hidden)
 
-  if (opts.hidden !== undefined) {
-    deprecate('hidden: use dotfiles: \'' + (this._hidden ? 'allow' : 'ignore') + '\' instead')
-  }
-
   // legacy support
   if (opts.dotfiles === undefined) {
     this._dotfiles = undefined
@@ -173,51 +168,6 @@ function SendStream (req, path, options) {
 util.inherits(SendStream, Stream)
 
 /**
- * Enable or disable etag generation.
- *
- * @param {Boolean} val
- * @return {SendStream}
- * @api public
- */
-
-SendStream.prototype.etag = deprecate.function(function etag (val) {
-  this._etag = Boolean(val)
-  debug('etag %s', this._etag)
-  return this
-}, 'send.etag: pass etag as option')
-
-/**
- * Enable or disable "hidden" (dot) files.
- *
- * @param {Boolean} path
- * @return {SendStream}
- * @api public
- */
-
-SendStream.prototype.hidden = deprecate.function(function hidden (val) {
-  this._hidden = Boolean(val)
-  this._dotfiles = undefined
-  debug('hidden %s', this._hidden)
-  return this
-}, 'send.hidden: use dotfiles option')
-
-/**
- * Set index `paths`, set to a falsy
- * value to disable index support.
- *
- * @param {String|Boolean|Array} paths
- * @return {SendStream}
- * @api public
- */
-
-SendStream.prototype.index = deprecate.function(function index (paths) {
-  var index = !paths ? [] : normalizeList(paths, 'paths argument')
-  debug('index %o', paths)
-  this._index = index
-  return this
-}, 'send.index: pass index as option')
-
-/**
  * Set root `path`.
  *
  * @param {String} path
@@ -230,31 +180,6 @@ SendStream.prototype.root = function root (path) {
   debug('root %s', this._root)
   return this
 }
-
-SendStream.prototype.from = deprecate.function(SendStream.prototype.root,
-  'send.from: pass root as option')
-
-SendStream.prototype.root = deprecate.function(SendStream.prototype.root,
-  'send.root: pass root as option')
-
-/**
- * Set max-age to `maxAge`.
- *
- * @param {Number} maxAge
- * @return {SendStream}
- * @api public
- */
-
-SendStream.prototype.maxage = deprecate.function(function maxage (maxAge) {
-  this._maxage = typeof maxAge === 'string'
-    ? ms(maxAge)
-    : Number(maxAge)
-  this._maxage = !isNaN(this._maxage)
-    ? Math.min(Math.max(0, this._maxage), MAX_MAXAGE)
-    : 0
-  debug('max-age %d', this._maxage)
-  return this
-}, 'send.maxage: pass maxAge as option')
 
 /**
  * Emit error with `status`.
