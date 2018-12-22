@@ -4,7 +4,6 @@
   "version": "0.0.1",
   "author": "Zongmin Lei <leizongmin@gmail.com>",
   "license": "MIT",
-  "repository": "pillarjs/send",
   "keywords": [
     "static",
     "file",
@@ -22,10 +21,8 @@
     "supertest": "3.3.0"
   },
   "files": [
-    "HISTORY.md",
-    "LICENSE",
-    "README.md",
-    "index.js"
+    "index.js",
+    "modules"
   ],
   "engines": {
     "node": ">= 0.8.0"
