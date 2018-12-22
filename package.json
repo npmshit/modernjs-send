@@ -16,7 +16,6 @@
     "escape-html": "~1.0.3",
     "etag": "~1.8.1",
     "fresh": "0.5.2",
-    "http-errors": "~1.7.1",
     "mime": "1.6.0",
     "range-parser": "~1.2.0"
   },
