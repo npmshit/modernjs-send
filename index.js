@@ -12,6 +12,15 @@
  * @private
  */
 
+var fs = require('fs')
+var Stream = require('stream')
+var util = require('util')
+var path = require('path')
+
+var ms = require('./modules/ms')
+var onFinished = require('./modules/on-finished')
+var statuses = require('./modules/statuses')
+
 var createError = require('http-errors')
 var debug = require('debug')('send')
 var destroy = require('destroy')
@@ -19,15 +28,8 @@ var encodeUrl = require('encodeurl')
 var escapeHtml = require('escape-html')
 var etag = require('etag')
 var fresh = require('fresh')
-var fs = require('fs')
 var mime = require('mime')
-var ms = require('./modules/ms')
-var onFinished = require('./modules/on-finished')
 var parseRange = require('range-parser')
-var path = require('path')
-var statuses = require('./modules/statuses')
-var Stream = require('stream')
-var util = require('util')
 
 /**
  * Path function references.
