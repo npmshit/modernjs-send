@@ -1,7 +1,7 @@
 {
   "name": "@modernjs/send",
   "description": "Better streaming static file server with Range and conditional-GET support",
-  "version": "0.16.2",
+  "version": "0.0.1",
   "author": "Zongmin Lei <leizongmin@gmail.com>",
   "license": "MIT",
   "repository": "pillarjs/send",
