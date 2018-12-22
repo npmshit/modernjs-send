@@ -21,15 +21,16 @@ var ms = require('./modules/ms')
 var onFinished = require('./modules/on-finished')
 var statuses = require('./modules/statuses')
 var destroy = require('./modules/destroy')
+var parseRange = require('./modules/range-parser')
 
 var createError = require('http-errors')
-var debug = require('debug')('send')
 var encodeUrl = require('encodeurl')
 var escapeHtml = require('escape-html')
 var etag = require('etag')
 var fresh = require('fresh')
+
+var debug = require('debug')('send')
 var mime = require('mime')
-var parseRange = require('range-parser')
 
 /**
  * Path function references.
