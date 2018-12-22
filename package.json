@@ -12,7 +12,6 @@
   ],
   "dependencies": {
     "debug": "2.6.9",
-    "escape-html": "~1.0.3",
     "etag": "~1.8.1",
     "fresh": "0.5.2",
     "mime": "1.6.0",

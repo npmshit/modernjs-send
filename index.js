@@ -24,8 +24,8 @@ var destroy = require('./modules/destroy')
 var parseRange = require('./modules/range-parser')
 var createError = require('./modules/http-errors')
 var encodeUrl = require('./modules/encodeurl')
+var escapeHtml = require('./modules/escape-html')
 
-var escapeHtml = require('escape-html')
 var etag = require('etag')
 var fresh = require('fresh')
 
