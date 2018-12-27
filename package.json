@@ -10,7 +10,7 @@
     "server"
   ],
   "dependencies": {
-    "@modernjs/mime": "^1.0.1",
+    "@modernjs/mime": "^1.0.2",
     "debug": "2.6.9"
   },
   "devDependencies": {
