@@ -1,7 +1,7 @@
 {
   "name": "@modernjs/send",
   "description": "Better streaming static file server with Range and conditional-GET support",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Zongmin Lei <leizongmin@gmail.com>",
   "license": "MIT",
   "keywords": [
