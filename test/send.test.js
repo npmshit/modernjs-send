@@ -6,7 +6,7 @@ var fs = require("fs");
 var http = require("http");
 var path = require("path");
 var request = require("supertest");
-var send = require("..");
+var send = require("../lib/send");
 
 // test server
 
