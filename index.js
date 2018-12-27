@@ -28,7 +28,7 @@ var escapeHtml = require("./modules/escape-html");
 var etag = require("./modules/etag");
 var fresh = require("./modules/fresh");
 
-var debug = require("debug")("send");
+var debug = require("@modernjs/debug")("send");
 var mime = require("@modernjs/mime");
 
 /**
