@@ -29,7 +29,7 @@ var etag = require("./modules/etag");
 var fresh = require("./modules/fresh");
 
 var debug = require("debug")("send");
-var mime = require("mime");
+var mime = require("@modernjs/mime");
 
 /**
  * Path function references.
@@ -746,17 +746,15 @@ SendStream.prototype.type = function type(path) {
 
   if (res.getHeader("Content-Type")) return;
 
-  var type = mime.lookup(path);
+  var type = mime.getType(path);
 
   if (!type) {
     debug("no content-type");
     return;
   }
 
-  var charset = mime.charsets.lookup(type);
-
   debug("content-type %s", type);
-  res.setHeader("Content-Type", type + (charset ? "; charset=" + charset : ""));
+  res.setHeader("Content-Type", type);
 };
 
 /**
