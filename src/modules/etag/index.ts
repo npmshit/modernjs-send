@@ -1,56 +1,36 @@
 /*!
  * etag
  * Copyright(c) 2014-2016 Douglas Christopher Wilson
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
-"use strict";
+import * as crypto from "crypto";
+import { Stats } from "fs";
 
-/**
- * Module exports.
- * @public
- */
-
-module.exports = etag;
-
-/**
- * Module dependencies.
- * @private
- */
-
-var crypto = require("crypto");
-var Stats = require("fs").Stats;
-
-/**
- * Module variables.
- * @private
- */
-
-var toString = Object.prototype.toString;
+const toString = Object.prototype.toString;
 
 /**
  * Generate an entity tag.
  *
  * @param {Buffer|string} entity
  * @return {string}
- * @private
  */
-
-function entitytag(entity) {
+function entitytag(entity: Buffer | string) {
   if (entity.length === 0) {
     // fast-path empty
     return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
   }
 
   // compute hash of entity
-  var hash = crypto
+  const hash = crypto
     .createHash("sha1")
-    .update(entity, "utf8")
+    .update(entity as any, "utf8")
     .digest("base64")
     .substring(0, 27);
 
   // compute length of entity
-  var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
+  const len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
 
   return '"' + len.toString(16) + "-" + hash + '"';
 }
@@ -62,17 +42,15 @@ function entitytag(entity) {
  * @param {object} [options]
  * @param {boolean} [options.weak]
  * @return {String}
- * @public
  */
-
-function etag(entity, options) {
+export function etag(entity: string | Buffer | Stats, options: { weak?: boolean } = {}) {
   if (entity == null) {
     throw new TypeError("argument entity is required");
   }
 
   // support fs.Stats object
-  var isStats = isstats(entity);
-  var weak = options && typeof options.weak === "boolean" ? options.weak : isStats;
+  const isStats = isstats(entity);
+  const weak = options && typeof options.weak === "boolean" ? options.weak : isStats;
 
   // validate argument
   if (!isStats && typeof entity !== "string" && !Buffer.isBuffer(entity)) {
@@ -80,7 +58,7 @@ function etag(entity, options) {
   }
 
   // generate entity tag
-  var tag = isStats ? stattag(entity) : entitytag(entity);
+  const tag = isStats ? stattag(entity as Stats) : entitytag(entity as Buffer | string);
 
   return weak ? "W/" + tag : tag;
 }
@@ -90,10 +68,8 @@ function etag(entity, options) {
  *
  * @param {object} obj
  * @return {boolean}
- * @api private
  */
-
-function isstats(obj) {
+function isstats(obj: string | Buffer | Stats) {
   // genuine fs.Stats
   if (typeof Stats === "function" && obj instanceof Stats) {
     return true;
@@ -119,12 +95,10 @@ function isstats(obj) {
  *
  * @param {object} stat
  * @return {string}
- * @private
  */
-
-function stattag(stat) {
-  var mtime = stat.mtime.getTime().toString(16);
-  var size = stat.size.toString(16);
+function stattag(stat: Stats) {
+  const mtime = stat.mtime.getTime().toString(16);
+  const size = stat.size.toString(16);
 
   return '"' + size + "-" + mtime + '"';
 }

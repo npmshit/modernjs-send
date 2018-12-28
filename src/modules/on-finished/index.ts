@@ -2,38 +2,13 @@
  * on-finished
  * Copyright(c) 2013 Jonathan Ong
  * Copyright(c) 2014 Douglas Christopher Wilson
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
-"use strict";
-
-/**
- * Module exports.
- * @public
- */
-
-module.exports = onFinished;
-module.exports.isFinished = isFinished;
-
-/**
- * Module dependencies.
- * @private
- */
-
-var first = require("../ee-first");
-
-/**
- * Variables.
- * @private
- */
-
-/* istanbul ignore next */
-var defer =
-  typeof setImmediate === "function"
-    ? setImmediate
-    : function(fn) {
-        process.nextTick(fn.bind.apply(fn, arguments));
-      };
+import { ServerResponse } from "http";
+import { Socket } from "net";
+import { first } from "../ee-first";
 
 /**
  * Invoke callback when the response has finished, useful for
@@ -44,10 +19,9 @@ var defer =
  * @return {object}
  * @public
  */
-
-function onFinished(msg, listener) {
+export function onFinished(msg: any, listener: Function) {
   if (isFinished(msg) !== false) {
-    defer(listener, null, msg);
+    setImmediate(listener as any, null, msg);
     return msg;
   }
 
@@ -62,11 +36,9 @@ function onFinished(msg, listener) {
  *
  * @param {object} msg
  * @return {boolean}
- * @public
  */
-
-function isFinished(msg) {
-  var socket = msg.socket;
+export function isFinished(msg: any) {
+  const socket = msg.socket;
 
   if (typeof msg.finished === "boolean") {
     // OutgoingMessage
@@ -87,26 +59,24 @@ function isFinished(msg) {
  *
  * @param {object} msg
  * @param {function} callback
- * @private
  */
+function attachFinishedListener(msg: any, callback: Function) {
+  let eeMsg: { (fn: Function): void; cancel: any; };
+  let eeSocket: { (fn: Function): void; (fn: Function): void; (fn: Function): void; cancel: any; };
+  let finished = false;
 
-function attachFinishedListener(msg, callback) {
-  var eeMsg;
-  var eeSocket;
-  var finished = false;
-
-  function onFinish(error) {
+  function onFinish(err: Error) {
     eeMsg.cancel();
     eeSocket.cancel();
 
     finished = true;
-    callback(error);
+    callback(err);
   }
 
   // finished on first message event
   eeMsg = eeSocket = first([[msg, "end", "finish"]], onFinish);
 
-  function onSocket(socket) {
+  function onSocket(socket: Socket) {
     // remove listener
     msg.removeListener("socket", onSocket);
 
@@ -140,8 +110,8 @@ function attachFinishedListener(msg, callback) {
  * @private
  */
 
-function attachListener(msg, listener) {
-  var attached = msg.__onFinished;
+function attachListener(msg: any, listener: Function) {
+  let attached = msg.__onFinished;
 
   // create a private single listener with queue
   if (!attached || !attached.queue) {
@@ -160,20 +130,24 @@ function attachListener(msg, listener) {
  * @private
  */
 
-function createListener(msg) {
-  function listener(err) {
+function createListener(msg: any) {
+  interface IListener {
+    (err: Error): void;
+    queue: Array<(err: Error, msg: any) => void> | null;
+  }
+  const listener: IListener = (err: Error) => {
     if (msg.__onFinished === listener) msg.__onFinished = null;
     if (!listener.queue) return;
 
-    var queue = listener.queue;
+    const queue = listener.queue;
     listener.queue = null;
 
-    for (var i = 0; i < queue.length; i++) {
+    for (let i = 0; i < queue.length; i++) {
       queue[i](err, msg);
     }
-  }
+  };
 
-  listener.queue = [];
+  listener.queue = [] as any;
 
   return listener;
 }
@@ -183,11 +157,9 @@ function createListener(msg) {
  *
  * @param {ServerResponse} res
  * @param {function} callback
- * @private
  */
-
-function patchAssignSocket(res, callback) {
-  var assignSocket = res.assignSocket;
+function patchAssignSocket(res: ServerResponse, callback: (s: Socket) => void) {
+  const assignSocket = res.assignSocket;
 
   if (typeof assignSocket !== "function") return;
 

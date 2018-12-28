@@ -2,17 +2,19 @@
  * range-parser
  * Copyright(c) 2012-2014 TJ Holowaychuk
  * Copyright(c) 2015-2016 Douglas Christopher Wilson
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
-"use strict";
+interface IRangeItem {
+  start: number;
+  end: number;
+  index?: number;
+}
 
-/**
- * Module exports.
- * @public
- */
-
-module.exports = rangeParser;
+interface IRanges extends Array<IRangeItem> {
+  type?: string;
+}
 
 /**
  * Parse "Range" header `str` relative to the given file `size`.
@@ -21,28 +23,26 @@ module.exports = rangeParser;
  * @param {String} str
  * @param {Object} [options]
  * @return {Array}
- * @public
  */
-
-function rangeParser(size, str, options) {
-  var index = str.indexOf("=");
+export function rangeParser(size: number, str: string, options: { combine: boolean }) {
+  const index = str.indexOf("=");
 
   if (index === -1) {
     return -2;
   }
 
   // split the range string
-  var arr = str.slice(index + 1).split(",");
-  var ranges = [];
+  const arr = str.slice(index + 1).split(",");
+  const ranges: IRanges = [];
 
   // add ranges type
   ranges.type = str.slice(0, index);
 
   // parse all ranges
-  for (var i = 0; i < arr.length; i++) {
-    var range = arr[i].split("-");
-    var start = parseInt(range[0], 10);
-    var end = parseInt(range[1], 10);
+  for (let i = 0; i < arr.length; i++) {
+    const range = arr[i].split("-");
+    let start = parseInt(range[0], 10);
+    let end = parseInt(range[1], 10);
 
     // -nnn
     if (isNaN(start)) {
@@ -80,15 +80,14 @@ function rangeParser(size, str, options) {
 
 /**
  * Combine overlapping & adjacent ranges.
- * @private
  */
+function combineRanges(ranges: IRanges) {
+  const ordered = ranges.map(mapWithIndex).sort(sortByRangeStart);
 
-function combineRanges(ranges) {
-  var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart);
-
-  for (var j = 0, i = 1; i < ordered.length; i++) {
-    var range = ordered[i];
-    var current = ordered[j];
+  let j = 0;
+  for (let i = 1; i < ordered.length; i++) {
+    const range = ordered[i];
+    const current = ordered[j];
 
     if (range.start > current.end + 1) {
       // next range
@@ -104,7 +103,7 @@ function combineRanges(ranges) {
   ordered.length = j + 1;
 
   // generate combined range
-  var combined = ordered.sort(sortByRangeIndex).map(mapWithoutIndex);
+  const combined: IRanges = ordered.sort(sortByRangeIndex).map(mapWithoutIndex);
 
   // copy ranges type
   combined.type = ranges.type;
@@ -114,10 +113,8 @@ function combineRanges(ranges) {
 
 /**
  * Map function to add index value to ranges.
- * @private
  */
-
-function mapWithIndex(range, index) {
+function mapWithIndex(range: IRangeItem, index: any) {
   return {
     start: range.start,
     end: range.end,
@@ -127,10 +124,8 @@ function mapWithIndex(range, index) {
 
 /**
  * Map function to remove index value from ranges.
- * @private
  */
-
-function mapWithoutIndex(range) {
+function mapWithoutIndex(range: IRangeItem) {
   return {
     start: range.start,
     end: range.end,
@@ -139,18 +134,14 @@ function mapWithoutIndex(range) {
 
 /**
  * Sort function to sort ranges by index.
- * @private
  */
-
-function sortByRangeIndex(a, b) {
-  return a.index - b.index;
+function sortByRangeIndex(a: IRangeItem, b: IRangeItem) {
+  return a.index! - b.index!;
 }
 
 /**
  * Sort function to sort ranges by start position.
- * @private
  */
-
-function sortByRangeStart(a, b) {
+function sortByRangeStart(a: IRangeItem, b: IRangeItem) {
   return a.start - b.start;
 }

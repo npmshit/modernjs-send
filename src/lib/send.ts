@@ -18,20 +18,18 @@ import { Stream } from "stream";
 import { extname, join, normalize, resolve, sep } from "path";
 import { IncomingMessage, ServerResponse, OutgoingHttpHeaders } from "http";
 import { EventEmitter } from "events";
-
-const ms = require("../modules/ms");
-const onFinished = require("../modules/on-finished");
-const statuses = require("../modules/statuses");
-const destroy = require("../modules/destroy");
-const parseRange = require("../modules/range-parser");
-const createError = require("../modules/http-errors");
-const encodeUrl = require("../modules/encodeurl");
-const escapeHtml = require("../modules/escape-html");
-const etag = require("../modules/etag");
-const fresh = require("../modules/fresh");
-
-const debug = require("@modernjs/debug")("send");
-const mime = require("@modernjs/mime");
+import { status as statuses } from "../modules/statuses";
+import { ms } from "../modules/ms";
+import { onFinished } from "../modules/on-finished";
+import { destroy } from "../modules/destroy";
+import { rangeParser as parseRange } from "../modules/range-parser";
+import { encodeUrl } from "../modules/encodeurl";
+import { escapeHtml } from "../modules/escape-html";
+import { etag } from "../modules/etag";
+import { fresh } from "../modules/fresh";
+import * as createDebug from "@modernjs/debug";
+import * as mime from "@modernjs/mime";
+const debug = createDebug("send");
 
 /**
  * Regular expression for identifying a bytes Range header.
@@ -55,6 +53,8 @@ export interface IHttpError {
   stack?: string;
   headers?: OutgoingHttpHeaders;
   code?: string | number;
+  status?: string | number;
+  statusCode?: string | number;
 }
 
 export interface ISendOptions {
@@ -193,8 +193,8 @@ export class SendStream extends Stream {
 
     this._lastModified = options.lastModified !== undefined ? Boolean(options.lastModified) : true;
 
-    this._maxage = typeof options.maxAge === "string" ? ms(options.maxAge) : Number(options.maxAge);
-    this._maxage = !isNaN(this._maxage) ? Math.min(Math.max(0, this._maxage), MAX_MAXAGE) : 0;
+    const maxage: any = typeof options.maxAge === "string" ? ms(options.maxAge) : Number(options.maxAge);
+    this._maxage = !isNaN(maxage) ? Math.min(Math.max(0, maxage), MAX_MAXAGE) : 0;
 
     this._root = options.root ? resolve(options.root) : null;
   }
@@ -220,16 +220,11 @@ export class SendStream extends Stream {
   public error(status: number, err?: IHttpError) {
     // emit if listeners instead of responding
     if (hasListeners(this, "error")) {
-      return this.emit(
-        "error",
-        createError(status, err, {
-          expose: false,
-        }),
-      );
+      return this.emit("error", createHttpError(status, err));
     }
 
     const res = this.res!;
-    const msg = statuses[status] || String(status);
+    const msg = (statuses.STATUS_CODES as any)[status] || String(status);
     const doc = createHtmlDocument("Error", escapeHtml(msg));
 
     // clear existing headers
@@ -284,7 +279,7 @@ export class SendStream extends Stream {
     // if-match
     const match = req.headers["if-match"];
     if (match) {
-      var etag = res.getHeader("ETag");
+      const etag = res.getHeader("ETag");
       return (
         !etag ||
         (match !== "*" &&
@@ -295,9 +290,9 @@ export class SendStream extends Stream {
     }
 
     // if-unmodified-since
-    var unmodifiedSince = parseHttpDate(req.headers["if-unmodified-since"]);
+    const unmodifiedSince = parseHttpDate(req.headers["if-unmodified-since"]);
     if (!isNaN(unmodifiedSince)) {
-      var lastModified = parseHttpDate(res.getHeader("Last-Modified"));
+      const lastModified = parseHttpDate(res.getHeader("Last-Modified"));
       return isNaN(lastModified) || lastModified > unmodifiedSince;
     }
 
@@ -399,7 +394,7 @@ export class SendStream extends Stream {
     }
 
     // if-range as modified date
-    var lastModified = this.res!.getHeader("Last-Modified");
+    const lastModified = this.res!.getHeader("Last-Modified");
     return parseHttpDate(lastModified) <= parseHttpDate(ifRange);
   }
 
@@ -571,7 +566,7 @@ export class SendStream extends Stream {
     // adjust len to start/end options
     len = Math.max(0, len - offset);
     if (options.end !== undefined) {
-      var bytes = options.end - offset + 1;
+      const bytes = options.end - offset + 1;
       if (len > bytes) len = bytes;
     }
 
@@ -931,7 +926,7 @@ function getHeaderNames(res: ServerResponse) {
  * @returns {boolean}
  */
 function hasListeners(emitter: EventEmitter, type: string) {
-  var count =
+  const count =
     typeof emitter.listenerCount !== "function" ? emitter.listeners(type).length : emitter.listenerCount(type);
 
   return count > 0;
@@ -954,9 +949,9 @@ function headersSent(res: ServerResponse) {
  * @param {string} name
  */
 function normalizeList(val: boolean | string | string[], name: string) {
-  var list = [].concat((val as any) || []);
+  const list = [].concat((val as any) || []);
 
-  for (var i = 0; i < list.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     if (typeof list[i] !== "string") {
       throw new TypeError(name + " must be array of strings or false");
     }
@@ -1023,4 +1018,15 @@ function setHeaders(res: ServerResponse, headers: OutgoingHttpHeaders) {
     const key = keys[i];
     res.setHeader(key, headers[key]!);
   }
+}
+
+function createHttpError(status: number, err?: IHttpError) {
+  if (err) {
+    err.statusCode = err.status = status;
+    return err;
+  }
+  err = new Error((statuses.STATUS_CODES as any)[status]);
+  err.name = err.message!.replace(/\s+/, "") + "Error";
+  err.statusCode = err.status = status;
+  return err;
 }

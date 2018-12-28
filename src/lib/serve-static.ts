@@ -18,10 +18,9 @@ import * as url from "url";
 import { resolve } from "path";
 import { send, SendStream } from "./send";
 import { IncomingMessage, ServerResponse } from "http";
-
-const encodeUrl = require("../modules/encodeurl");
-const escapeHtml = require("../modules/escape-html");
-const parseUrl = require("../modules/parseurl");
+import { encodeUrl } from "../modules/encodeurl";
+import { escapeHtml } from "../modules/escape-html";
+import { parseUrl, getOriginalUrl } from "../modules/parseurl";
 
 export interface IServeStaticOptions {
   /**
@@ -119,13 +118,13 @@ export function serveStatic(root: string, options: IServeStaticOptions = {}) {
   const opts = { ...options };
 
   // fall-though
-  var fallthrough = opts.fallthrough !== false;
+  const fallthrough = opts.fallthrough !== false;
 
   // default redirect
-  var redirect = opts.redirect !== false;
+  const redirect = opts.redirect !== false;
 
   // headers listener
-  var setHeaders = opts.setHeaders;
+  const setHeaders = opts.setHeaders;
 
   if (setHeaders && typeof setHeaders !== "function") {
     throw new TypeError("option setHeaders must be function");
@@ -150,16 +149,16 @@ export function serveStatic(root: string, options: IServeStaticOptions = {}) {
     }
 
     let forwardError = !fallthrough;
-    let path = parseUrl(req).pathname;
-    const originalUrl = parseUrl.original(req);
+    let path = parseUrl(req)!.pathname;
+    const originalUrl = getOriginalUrl(req);
 
     // make sure redirect occurs at mount
-    if (path === "/" && originalUrl.pathname.substr(-1) !== "/") {
+    if (path === "/" && originalUrl.pathname!.substr(-1) !== "/") {
       path = "";
     }
 
     // create send stream
-    const stream = send(req, path, opts);
+    const stream = send(req, path!, opts);
 
     // construct directory listener
     const onDirectory = redirect ? createRedirectDirectoryListener(stream) : createNotFoundDirectoryListener(stream);
@@ -254,15 +253,15 @@ function createRedirectDirectoryListener(stream: SendStream) {
     }
 
     // get original URL
-    var originalUrl = parseUrl.original(stream.req);
+    const originalUrl = getOriginalUrl(stream.req);
 
     // append trailing slash
-    originalUrl.path = null;
+    originalUrl.path = null as any;
     originalUrl.pathname = collapseLeadingSlashes(originalUrl.pathname + "/");
 
     // reformat the URL
-    var loc = encodeUrl(url.format(originalUrl));
-    var doc = createHtmlDocument(
+    const loc = encodeUrl(url.format(originalUrl));
+    const doc = createHtmlDocument(
       "Redirecting",
       'Redirecting to <a href="' + escapeHtml(loc) + '">' + escapeHtml(loc) + "</a>",
     );

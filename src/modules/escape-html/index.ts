@@ -3,45 +3,30 @@
  * Copyright(c) 2012-2013 TJ Holowaychuk
  * Copyright(c) 2015 Andreas Lubbe
  * Copyright(c) 2015 Tiancheng "Timothy" Gu
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
-"use strict";
-
-/**
- * Module variables.
- * @private
- */
-
-var matchHtmlRegExp = /["'&<>]/;
-
-/**
- * Module exports.
- * @public
- */
-
-module.exports = escapeHtml;
+const matchHtmlRegExp = /["'&<>]/;
 
 /**
  * Escape special characters in the given string of html.
  *
  * @param  {string} string The string to escape for inserting into HTML
  * @return {string}
- * @public
  */
-
-function escapeHtml(string) {
-  var str = "" + string;
-  var match = matchHtmlRegExp.exec(str);
+export function escapeHtml(string: string) {
+  const str = String(string);
+  const match = matchHtmlRegExp.exec(str);
 
   if (!match) {
     return str;
   }
 
-  var escape;
-  var html = "";
-  var index = 0;
-  var lastIndex = 0;
+  let escape;
+  let html = "";
+  let index = 0;
+  let lastIndex = 0;
 
   for (index = match.index; index < str.length; index++) {
     switch (str.charCodeAt(index)) {

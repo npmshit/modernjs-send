@@ -1,13 +1,16 @@
 /**
  * Helpers.
+ *
+ * Copyright (c) 2016 Zeit
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  */
 
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var w = d * 7;
-var y = d * 365.25;
+const s = 1000;
+const m = s * 60;
+const h = m * 60;
+const d = h * 24;
+const w = d * 7;
+const y = d * 365.25;
 
 /**
  * Parse or format the given `val`.
@@ -20,41 +23,37 @@ var y = d * 365.25;
  * @param {Object} [options]
  * @throws {Error} throw an error if val is not a non-empty string or a number
  * @return {String|Number}
- * @api public
  */
-
-module.exports = function(val, options) {
+export function ms(val: number | string, options: { long?: any } = {}) {
   options = options || {};
-  var type = typeof val;
-  if (type === "string" && val.length > 0) {
-    return parse(val);
-  } else if (type === "number" && isNaN(val) === false) {
-    return options.long ? fmtLong(val) : fmtShort(val);
+  const type = typeof val;
+  if (type === "string" && (val as string).length > 0) {
+    return parse(val as string);
+  } else if (type === "number" && isNaN(val as number) === false) {
+    return options.long ? fmtLong(val as number) : fmtShort(val as number);
   }
   throw new Error("val is not a non-empty string or a valid number. val=" + JSON.stringify(val));
-};
+}
 
 /**
  * Parse the given `str` and return milliseconds.
  *
  * @param {String} str
  * @return {Number}
- * @api private
  */
-
-function parse(str) {
+function parse(str: string) {
   str = String(str);
   if (str.length > 100) {
     return;
   }
-  var match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+  const match = /^((?:\d+)?\-?\d?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
     str,
   );
   if (!match) {
     return;
   }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || "ms").toLowerCase();
+  const n = parseFloat(match[1]);
+  const type = (match[2] || "ms").toLowerCase();
   switch (type) {
     case "years":
     case "year":
@@ -104,11 +103,9 @@ function parse(str) {
  *
  * @param {Number} ms
  * @return {String}
- * @api private
  */
-
-function fmtShort(ms) {
-  var msAbs = Math.abs(ms);
+function fmtShort(ms: number) {
+  const msAbs = Math.abs(ms);
   if (msAbs >= d) {
     return Math.round(ms / d) + "d";
   }
@@ -129,11 +126,9 @@ function fmtShort(ms) {
  *
  * @param {Number} ms
  * @return {String}
- * @api private
  */
-
-function fmtLong(ms) {
-  var msAbs = Math.abs(ms);
+function fmtLong(ms: number) {
+  const msAbs = Math.abs(ms);
   if (msAbs >= d) {
     return plural(ms, msAbs, d, "day");
   }
@@ -152,8 +147,7 @@ function fmtLong(ms) {
 /**
  * Pluralization helper.
  */
-
-function plural(ms, msAbs, n, name) {
-  var isPlural = msAbs >= n * 1.5;
+function plural(ms: number, msAbs: number, n: number, name: string) {
+  const isPlural = msAbs >= n * 1.5;
   return Math.round(ms / n) + " " + name + (isPlural ? "s" : "");
 }

@@ -2,17 +2,11 @@
  * statuses
  * Copyright(c) 2014 Jonathan Ong
  * Copyright(c) 2016 Douglas Christopher Wilson
+ * Copyright(c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
-"use strict";
-
-/**
- * Module dependencies.
- * @private
- */
-
-var codes = {
+const codes = {
   "100": "Continue",
   "101": "Switching Protocols",
   "102": "Processing",
@@ -80,11 +74,38 @@ var codes = {
 };
 
 /**
- * Module exports.
- * @public
+ * Get the status code.
+ *
+ * Given a number, this will throw if it is not a known status
+ * code, otherwise the code will be returned. Given a string,
+ * the string will be parsed for a number and return the code
+ * if valid, otherwise will lookup the code assuming this is
+ * the status message.
+ *
+ * @param {string|number} code
+ * @returns {number}
  */
+export function status(code: string | number) {
+  if (typeof code === "number") {
+    if (!(status as any)[code]) throw new Error("invalid status code: " + code);
+    return code;
+  }
 
-module.exports = status;
+  if (typeof code !== "string") {
+    throw new TypeError("code must be a number or string");
+  }
+
+  // '403'
+  let n = parseInt(code, 10);
+  if (!isNaN(n)) {
+    if (!(status as any)[n]) throw new Error("invalid status code: " + n);
+    return n;
+  }
+
+  n = (status as any)[code.toLowerCase()];
+  if (!n) throw new Error('invalid status message: "' + code + '"');
+  return n;
+}
 
 // status code to message map
 status.STATUS_CODES = codes;
@@ -119,15 +140,13 @@ status.retry = {
 
 /**
  * Populate the statuses map for given codes.
- * @private
  */
-
-function populateStatusesMap(statuses, codes) {
-  var arr = [];
+function populateStatusesMap(statuses: any, codes: any) {
+  const arr: number[] = [];
 
   Object.keys(codes).forEach(function forEachCode(code) {
-    var message = codes[code];
-    var status = Number(code);
+    const message = codes[code];
+    const status = Number(code);
 
     // Populate properties
     statuses[status] = message;
@@ -139,40 +158,4 @@ function populateStatusesMap(statuses, codes) {
   });
 
   return arr;
-}
-
-/**
- * Get the status code.
- *
- * Given a number, this will throw if it is not a known status
- * code, otherwise the code will be returned. Given a string,
- * the string will be parsed for a number and return the code
- * if valid, otherwise will lookup the code assuming this is
- * the status message.
- *
- * @param {string|number} code
- * @returns {number}
- * @public
- */
-
-function status(code) {
-  if (typeof code === "number") {
-    if (!status[code]) throw new Error("invalid status code: " + code);
-    return code;
-  }
-
-  if (typeof code !== "string") {
-    throw new TypeError("code must be a number or string");
-  }
-
-  // '403'
-  var n = parseInt(code, 10);
-  if (!isNaN(n)) {
-    if (!status[n]) throw new Error("invalid status code: " + n);
-    return n;
-  }
-
-  n = status[code.toLowerCase()];
-  if (!n) throw new Error('invalid status message: "' + code + '"');
-  return n;
 }
