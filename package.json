@@ -36,7 +36,8 @@
     "compile": "rm -rf dist && tsc",
     "lint": "eslint --plugin markdown --ext js,md .",
     "test": "npm run compile && mocha --check-leaks",
-    "test-cov": "rm -rf coverage && nyc --reporter=lcov npm test"
+    "test-cov": "rm -rf coverage && nyc --reporter=lcov npm test",
+    "prepublishOnly": "npm test"
   },
   "nyc": {
     "extension": [
