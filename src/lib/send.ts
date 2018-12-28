@@ -2,6 +2,7 @@
  * send
  * Copyright(c) 2012 TJ Holowaychuk
  * Copyright(c) 2014-2016 Douglas Christopher Wilson
+ * Copyright (c) 2018 Zongmin Lei <leizongmin@gmail.com>
  * MIT Licensed
  */
 
@@ -142,7 +143,7 @@ export function send(req: IncomingMessage, path: string, options: ISendOptions) 
   return new SendStream(req, path, options);
 }
 
-class SendStream extends Stream {
+export class SendStream extends Stream {
   protected _acceptRanges: boolean;
   protected _cacheControl: boolean;
   protected _etag: boolean;
@@ -216,7 +217,7 @@ class SendStream extends Stream {
    * @param {number} status
    * @param {Error} [err]
    */
-  protected error(status: number, err?: IHttpError) {
+  public error(status: number, err?: IHttpError) {
     // emit if listeners instead of responding
     if (hasListeners(this, "error")) {
       return this.emit(
@@ -253,7 +254,7 @@ class SendStream extends Stream {
    *
    * @return {boolean}
    */
-  protected hasTrailingSlash() {
+  public hasTrailingSlash() {
     return this.path[this.path.length - 1] === "/";
   }
 

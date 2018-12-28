@@ -2,7 +2,7 @@ var assert = require("assert");
 var http = require("http");
 var path = require("path");
 var request = require("supertest");
-var serveStatic = require("../dist/lib/serve-static");
+var serveStatic = require("../dist/lib/serve-static").serveStatic;
 
 var fixtures = path.join(__dirname, "/fixtures");
 var relative = path.relative(process.cwd(), fixtures);
