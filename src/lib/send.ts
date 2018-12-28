@@ -19,10 +19,9 @@ import { extname, join, normalize, resolve, sep } from "path";
 import { IncomingMessage, ServerResponse, OutgoingHttpHeaders } from "http";
 import { EventEmitter } from "events";
 
-import { getStatusCodeMessage, createHttpError, IHttpError } from "./utils";
+import { getStatusCodeMessage, createHttpError, IHttpError, onFinished } from "./utils";
 
 import { ms } from "../modules/ms";
-import { onFinished } from "../modules/on-finished";
 import { rangeParser as parseRange } from "../modules/range-parser";
 import { encodeUrl } from "../modules/encodeurl";
 import { escapeHtml } from "../modules/escape-html";

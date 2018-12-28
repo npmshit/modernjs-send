@@ -5,7 +5,7 @@
  * MIT Licensed
  */
 
-import { STATUS_CODES, OutgoingHttpHeaders } from "http";
+import { STATUS_CODES, OutgoingHttpHeaders, ServerResponse } from "http";
 
 /**
  * HTTP Error
@@ -44,4 +44,26 @@ export function createHttpError(status: number, err?: IHttpError) {
   err.name = err.message!.replace(/\s+/, "") + "Error";
   err.statusCode = err.status = status;
   return err;
+}
+
+/**
+ * 当 ServerResponse 完成时调用
+ * @param res
+ * @param callback
+ */
+export function onFinished(res: ServerResponse, callback: () => void) {
+  if (res.finished) {
+    return setImmediate(callback);
+  }
+  let hasCalled = false;
+  const firstCallback = () => {
+    if (!hasCalled) {
+      hasCalled = true;
+      callback();
+    }
+  };
+  res.once("end", firstCallback);
+  res.once("close", firstCallback);
+  res.once("finish", firstCallback);
+  res.once("error", firstCallback);
 }
