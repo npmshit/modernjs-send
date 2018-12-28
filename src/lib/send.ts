@@ -23,7 +23,6 @@ import { getStatusCodeMessage, createHttpError, IHttpError } from "./utils";
 
 import { ms } from "../modules/ms";
 import { onFinished } from "../modules/on-finished";
-import { destroy } from "../modules/destroy";
 import { rangeParser as parseRange } from "../modules/range-parser";
 import { encodeUrl } from "../modules/encodeurl";
 import { escapeHtml } from "../modules/escape-html";
@@ -721,7 +720,7 @@ export class SendStream extends Stream {
     // response finished, done with the fd
     onFinished(res, () => {
       finished = true;
-      destroy(stream);
+      stream.destroy();
     });
 
     // error handling code-smell
@@ -731,7 +730,7 @@ export class SendStream extends Stream {
 
       // clean up stream
       finished = true;
-      destroy(stream);
+      stream.destroy();
 
       // error
       this.onStatError(err);
