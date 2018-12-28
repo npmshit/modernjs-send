@@ -29,7 +29,7 @@ $ npm install send
 <!-- eslint-disable no-unused-vars -->
 
 ```js
-var send = require('send')
+const send = require('send')
 ```
 
 ### send(req, path, [options])
@@ -179,10 +179,10 @@ $ npm test
 This simple example will send a specific file to all requests.
 
 ```js
-var http = require('http')
-var send = require('send')
+const http = require('http')
+const send = require('send')
 
-var server = http.createServer(function onRequest (req, res) {
+const server = http.createServer(function onRequest (req, res) {
   send(req, '/path/to/index.html')
     .pipe(res)
 })
@@ -197,11 +197,11 @@ given directory as the top-level. For example, a request
 `GET /foo.txt` will send back `/www/public/foo.txt`.
 
 ```js
-var http = require('http')
-var parseUrl = require('parseurl')
-var send = require('send')
+const http = require('http')
+const parseUrl = require('parseurl')
+const send = require('send')
 
-var server = http.createServer(function onRequest (req, res) {
+const server = http.createServer(function onRequest (req, res) {
   send(req, parseUrl(req).pathname, { root: '/www/public' })
     .pipe(res)
 })
@@ -212,9 +212,9 @@ server.listen(3000)
 ### Custom file types
 
 ```js
-var http = require('http')
-var parseUrl = require('parseurl')
-var send = require('send')
+const http = require('http')
+const parseUrl = require('parseurl')
+const send = require('send')
 
 // Default unknown types to text/plain
 send.mime.default_type = 'text/plain'
@@ -224,7 +224,7 @@ send.mime.define({
   'application/x-my-type': ['x-mt', 'x-mtt']
 })
 
-var server = http.createServer(function onRequest (req, res) {
+const server = http.createServer(function onRequest (req, res) {
   send(req, parseUrl(req).pathname, { root: '/www/public' })
     .pipe(res)
 })
@@ -238,14 +238,14 @@ This is a example of serving up a structure of directories with a
 custom function to render a listing of a directory.
 
 ```js
-var http = require('http')
-var fs = require('fs')
-var parseUrl = require('parseurl')
-var send = require('send')
+const http = require('http')
+const fs = require('fs')
+const parseUrl = require('parseurl')
+const send = require('send')
 
 // Transfer arbitrary files from within /www/example.com/public/*
 // with a custom handler for directory listing
-var server = http.createServer(function onRequest (req, res) {
+const server = http.createServer(function onRequest (req, res) {
   send(req, parseUrl(req).pathname, { index: false, root: '/www/public' })
     .once('directory', directory)
     .pipe(res)
@@ -255,7 +255,7 @@ server.listen(3000)
 
 // Custom directory handler
 function directory (res, path) {
-  var stream = this
+  const stream = this
 
   // redirect to trailing slash for consistent url
   if (!stream.hasTrailingSlash()) {
@@ -276,11 +276,11 @@ function directory (res, path) {
 ### Serving from a root directory with custom error-handling
 
 ```js
-var http = require('http')
-var parseUrl = require('parseurl')
-var send = require('send')
+const http = require('http')
+const parseUrl = require('parseurl')
+const send = require('send')
 
-var server = http.createServer(function onRequest (req, res) {
+const server = http.createServer(function onRequest (req, res) {
   // your custom error-handling logic:
   function error (err) {
     res.statusCode = err.status || 500
