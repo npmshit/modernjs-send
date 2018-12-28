@@ -18,7 +18,9 @@ import { Stream } from "stream";
 import { extname, join, normalize, resolve, sep } from "path";
 import { IncomingMessage, ServerResponse, OutgoingHttpHeaders } from "http";
 import { EventEmitter } from "events";
-import { status as statuses } from "../modules/statuses";
+
+import { getStatusCodeMessage, createHttpError, IHttpError } from "./utils";
+
 import { ms } from "../modules/ms";
 import { onFinished } from "../modules/on-finished";
 import { destroy } from "../modules/destroy";
@@ -46,16 +48,6 @@ const MAX_MAXAGE = 60 * 60 * 24 * 365 * 1000; // 1 year
  * @private
  */
 const UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
-
-export interface IHttpError {
-  message?: string;
-  name?: string;
-  stack?: string;
-  headers?: OutgoingHttpHeaders;
-  code?: string | number;
-  status?: string | number;
-  statusCode?: string | number;
-}
 
 export interface ISendOptions {
   /**
@@ -224,7 +216,7 @@ export class SendStream extends Stream {
     }
 
     const res = this.res!;
-    const msg = (statuses.STATUS_CODES as any)[status] || String(status);
+    const msg = getStatusCodeMessage(status);
     const doc = createHtmlDocument("Error", escapeHtml(msg));
 
     // clear existing headers
@@ -1018,15 +1010,4 @@ function setHeaders(res: ServerResponse, headers: OutgoingHttpHeaders) {
     const key = keys[i];
     res.setHeader(key, headers[key]!);
   }
-}
-
-function createHttpError(status: number, err?: IHttpError) {
-  if (err) {
-    err.statusCode = err.status = status;
-    return err;
-  }
-  err = new Error((statuses.STATUS_CODES as any)[status]);
-  err.name = err.message!.replace(/\s+/, "") + "Error";
-  err.statusCode = err.status = status;
-  return err;
 }
