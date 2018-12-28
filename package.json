@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "after": "0.8.2",
-    "istanbul": "0.4.5",
     "mocha": "5.2.0",
+    "nyc": "^13.1.0",
     "prettier": "^1.15.3",
     "supertest": "3.3.0",
     "typescript": "^3.2.2"
@@ -35,7 +35,14 @@
     "compile": "rm -rf dist && tsc",
     "lint": "eslint --plugin markdown --ext js,md .",
     "test": "npm run compile && mocha --check-leaks --reporter spec --bail",
-    "test-ci": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --check-leaks --reporter spec",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --check-leaks --reporter dot"
+    "test-cov": "nyc npm test"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ]
   }
 }
