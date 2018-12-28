@@ -1,13 +1,18 @@
 {
   "name": "@modernjs/send",
   "description": "Better streaming static file server with Range and conditional-GET support",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Zongmin Lei <leizongmin@gmail.com>",
   "license": "MIT",
   "keywords": [
     "static",
     "file",
     "server"
+  ],
+  "main": "dist/lib/index.js",
+  "typings": "dist/lib/index.d.ts",
+  "files": [
+    "dist"
   ],
   "dependencies": {
     "@modernjs/debug": "^1.0.1",
@@ -24,10 +29,6 @@
     "supertest": "3.3.0",
     "typescript": "^3.2.2"
   },
-  "files": [
-    "index.js",
-    "modules"
-  ],
   "engines": {
     "node": ">= 0.8.0"
   },
